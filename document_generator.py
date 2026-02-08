@@ -26,7 +26,8 @@ class DocumentGenerator:
         print(f"[DEBUG] GEMINI_API_KEY found: {api_key[:10]}...")
         genai.configure(api_key=api_key)
         
-        self.model_name = os.getenv("DOC_AGENT_GEMINI_MODEL", "gemini-2.0-flash-exp")
+        # Use same model format as other agents: models/gemini-2.0-flash
+        self.model_name = os.getenv("DOC_AGENT_GEMINI_MODEL", "models/gemini-2.0-flash")
         self.model = genai.GenerativeModel(self.model_name)
         print(f"[DOC] DocumentGenerator initialized with model: {self.model_name}")
     
