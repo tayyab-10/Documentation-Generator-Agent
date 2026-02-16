@@ -41,13 +41,24 @@ class DocumentGenerator:
     
     def get_document_structure(self, document_type: str) -> Optional[Dict[str, Any]]:
         """Get structure for a specific document type"""
-        return get_document_structure(document_type)
+        doc = get_document_structure(document_type)
+        if not doc:
+            return None
+        
+        # Return full document info including structure
+        return {
+            "name": doc.get("name"),
+            "description": doc.get("description"),
+            "category": doc.get("category"),
+            "structure": doc.get("structure", [])
+        }
     
     async def generate_document(
         self,
         document_type: str,
         project_context: Dict[str, Any],
         user_requirements: Optional[str] = None,
+        selected_sections: Optional[List[Dict[str, str]]] = None,
         custom_sections: Optional[List[Dict[str, str]]] = None,
         additional_notes: Optional[str] = None,
         include_data_summary: bool = True
@@ -59,6 +70,7 @@ class DocumentGenerator:
             document_type: Type of document (SRS, SPRINT_REPORT, etc.)
             project_context: Complete project data from Node backend
             user_requirements: User's specific requirements
+            selected_sections: Specific sections selected by user to include
             custom_sections: User-defined custom sections
             additional_notes: Additional instructions
             include_data_summary: Include project data summary
@@ -81,6 +93,7 @@ class DocumentGenerator:
                 doc_structure=doc_structure,
                 project_context=project_context,
                 user_requirements=user_requirements,
+                selected_sections=selected_sections or [],
                 custom_sections=custom_sections or [],
                 additional_notes=additional_notes,
                 include_data_summary=include_data_summary
@@ -121,25 +134,35 @@ class DocumentGenerator:
         doc_structure: Dict[str, Any],
         project_context: Dict[str, Any],
         user_requirements: Optional[str],
+        selected_sections: List[Dict[str, str]],
         custom_sections: List[Dict[str, str]],
         additional_notes: Optional[str],
         include_data_summary: bool
     ) -> str:
         """Build comprehensive prompt for Gemini"""
         
-        prompt = f"""You are a world-class professional technical writer and software documentation expert with deep expertise in industry standards (IEEE, ISO, arc42, Agile). Generate a comprehensive, accurate, and professional {doc_structure['name']}.
+        prompt = f"""You are a world-class professional technical writer and software documentation expert with deep expertise in industry standards (IEEE 830-1998, ISO, arc42, Agile best practices). Generate a comprehensive, accurate, and professional {doc_structure['name']}.
 
-**CRITICAL QUALITY REQUIREMENTS:**
-1. **ACCURACY FIRST**: Base ALL content on the actual project data provided. DO NOT hallucinate or make up information.
-2. **PROFESSIONAL TONE**: Use clear, concise, and professional language appropriate for stakeholders.
-3. **INDUSTRY STANDARDS**: Follow {doc_structure['description']} standards meticulously.
-4. **SPECIFIC DETAILS**: Include specific data points, numbers, dates, and names from the project context.
-5. **CONSISTENCY**: Maintain consistent terminology, formatting, and style throughout.
-6. **TECHNICAL PRECISION**: Use correct technical terminology and accurate descriptions.
-7. **COMPLETENESS**: Address all required sections thoroughly.
-8. **CLARITY**: Write for the intended audience (technical or non-technical as appropriate).
-9. **ACTIONABLE**: Include concrete recommendations and action items where relevant.
-10. **HONEST**: If data is missing, explicitly state "[To be determined]" or "[Requires stakeholder input]".
+**CRITICAL WRITING GUIDELINES:**
+1. **PROFESSIONAL TONE**: Write in a clear, authoritative, yet accessible manner similar to official IEEE or ISO documentation
+2. **PROPER FORMATTING**: Use proper markdown formatting:
+   - Use # for main headings (# 1. Introduction)
+   - Use ## for subsections (## 1.1 Purpose)
+   - Use ### for sub-subsections if needed
+   - Include section numbering (1.1, 1.2, 2.1, etc.)
+3. **COMPREHENSIVE CONTENT**: Write detailed paragraphs (minimum 3-5 sentences per subsection)
+4. **STRUCTURED DATA**: Use bullet points for lists, tables for structured data, code blocks for technical specs
+5. **SPECIFIC DETAILS**: Include concrete numbers, dates, names, and technical specifications from the project context
+6. **HUMANIZED WRITING**: Write naturally, avoiding robotic or template-like language while maintaining professionalism
+7. **ACCURACY**: Base ALL content on actual project data provided. Mark missing information as "[To be determined]"
+8. **CONSISTENCY**: Maintain consistent terminology, style, and formatting throughout
+
+**QUALITY REQUIREMENTS:**
+- Follow {doc_structure['description']} standards meticulously
+- Be specific and avoid vague statements
+- Include actionable recommendations where relevant
+- Write for both technical and non-technical stakeholders
+- Ensure content is thorough and publication-ready
 
 ---
 
@@ -149,16 +172,38 @@ class DocumentGenerator:
 
 ---
 
-## REQUIRED DOCUMENT STRUCTURE:
+## DOCUMENT STRUCTURE TO GENERATE:
 
 """
         
-        # Add structure outline
-        for section in doc_structure.get("structure", []):
-            prompt += f"\n### Section {section['section']}: {section['title']}\n"
-            for sub in section.get("subsections", []):
-                required_tag = "[REQUIRED]" if sub["required"] else "[OPTIONAL]"
-                prompt += f"- {sub['id']} {sub['title']} {required_tag}\n"
+        # If user selected specific sections, only show those
+        if selected_sections:
+            selected_ids = {sec['id'] for sec in selected_sections}
+            prompt += "\n**GENERATE ONLY THE FOLLOWING SECTIONS (user-selected):**\n\n"
+            
+            for section in doc_structure.get("structure", []):
+                section_subs = []
+                for sub in section.get("subsections", []):
+                    if sub['id'] in selected_ids:
+                        section_subs.append(sub)
+                
+                if section_subs:
+                    prompt += f"### Section {section['section']}: {section['title']}\n"
+                    for sub in section_subs:
+                        prompt += f"- **{sub['id']} {sub['title']}** - {sub.get('description', '')}\n"
+                    prompt += "\n"
+            
+            prompt += "\n⚠️ **IMPORTANT**: Generate ONLY the sections listed above. Do NOT include any other sections.\n\n"
+        else:
+            # Show all sections
+            for section in doc_structure.get("structure", []):
+                prompt += f"\n### Section {section['section']}: {section['title']}\n"
+                prompt += f"*{section.get('description', '')}*\n\n"
+                for sub in section.get("subsections", []):
+                    required_tag = "**[REQUIRED]**" if sub.get("required") else "[OPTIONAL]"
+                    prompt += f"- **{sub['id']} {sub['title']}** {required_tag}\n"
+                    if sub.get('description'):
+                        prompt += f"  _{sub['description']}_\n"
         
         prompt += "\n---\n\n## PROJECT CONTEXT AND DATA:\n\n"
         

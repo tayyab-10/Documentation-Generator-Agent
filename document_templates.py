@@ -6,50 +6,267 @@ Defines professional document types based on industry standards
 DOCUMENT_TYPES = {
     "SRS": {
         "name": "Software Requirements Specification (SRS)",
-        "description": "IEEE 830-1998 compliant requirements specification",
+        "description": "IEEE 830-1998 compliant requirements specification with detailed sections",
         "category": "Requirements",
         "icon": "FileText",
         "structure": [
             {
                 "section": "1",
                 "title": "Introduction",
+                "description": "10,000-foot view of the overall project including purpose, scope, and intended audience",
                 "subsections": [
-                    {"id": "1.1", "title": "Purpose", "required": True},
-                    {"id": "1.2", "title": "Scope", "required": True},
-                    {"id": "1.3", "title": "Definitions, Acronyms, and Abbreviations", "required": True},
-                    {"id": "1.4", "title": "References", "required": False},
-                    {"id": "1.5", "title": "Overview", "required": True},
+                    {
+                        "id": "1.1",
+                        "title": "Purpose",
+                        "description": "Describe the purpose of the product and intended audience",
+                        "required": True,
+                        "selectable": False
+                    },
+                    {
+                        "id": "1.2",
+                        "title": "Product Scope",
+                        "description": "Benefits, objectives, and goals intended for the product. Relate to overall business goals",
+                        "required": True,
+                        "selectable": True
+                    },
+                    {
+                        "id": "1.3",
+                        "title": "Product Value",
+                        "description": "Why the product is important and how it will help the intended audience",
+                        "required": True,
+                        "selectable": True
+                    },
+                    {
+                        "id": "1.4",
+                        "title": "Intended Audience",
+                        "description": "Describe the ideal audience and their characteristics",
+                        "required": True,
+                        "selectable": True
+                    },
+                    {
+                        "id": "1.5",
+                        "title": "Intended Use",
+                        "description": "How the audience will use the product, including use cases",
+                        "required": True,
+                        "selectable": True
+                    },
+                    {
+                        "id": "1.6",
+                        "title": "Definitions, Acronyms, and Abbreviations",
+                        "description": "Industry-specific terms, acronyms, and jargon definitions",
+                        "required": True,
+                        "selectable": True
+                    },
+                    {
+                        "id": "1.7",
+                        "title": "References",
+                        "description": "External documents, standards, or resources referenced",
+                        "required": False,
+                        "selectable": True
+                    }
                 ]
             },
             {
                 "section": "2",
-                "title": "Overall Description",
+                "title": "System Requirements and Functional Requirements",
+                "description": "Detailed functional requirements that allow the system to perform as intended",
                 "subsections": [
-                    {"id": "2.1", "title": "Product Perspective", "required": True},
-                    {"id": "2.2", "title": "Product Functions", "required": True},
-                    {"id": "2.3", "title": "User Characteristics", "required": True},
-                    {"id": "2.4", "title": "Constraints", "required": True},
-                    {"id": "2.5", "title": "Assumptions and Dependencies", "required": True},
+                    {
+                        "id": "2.1",
+                        "title": "System Features and Functions",
+                        "description": "Break down system features that allow proper performance",
+                        "required": True,
+                        "selectable": True
+                    },
+                    {
+                        "id": "2.2",
+                        "title": "If/Then Behaviors",
+                        "description": "Conditional logic and system responses",
+                        "required": False,
+                        "selectable": True
+                    },
+                    {
+                        "id": "2.3",
+                        "title": "Data Handling Logic",
+                        "description": "How the system processes, stores, and retrieves data",
+                        "required": True,
+                        "selectable": True
+                    },
+                    {
+                        "id": "2.4",
+                        "title": "System Workflows",
+                        "description": "Step-by-step processes and user journeys",
+                        "required": True,
+                        "selectable": True
+                    },
+                    {
+                        "id": "2.5",
+                        "title": "Transaction Handling",
+                        "description": "How the system manages transactions and state",
+                        "required": False,
+                        "selectable": True
+                    },
+                    {
+                        "id": "2.6",
+                        "title": "Administrative Functions",
+                        "description": "Admin panel, user management, and system administration",
+                        "required": False,
+                        "selectable": True
+                    },
+                    {
+                        "id": "2.7",
+                        "title": "Regulatory and Compliance Needs",
+                        "description": "Legal, regulatory, and compliance requirements",
+                        "required": False,
+                        "selectable": True
+                    },
+                    {
+                        "id": "2.8",
+                        "title": "Performance Requirements",
+                        "description": "Speed, response time, throughput, and performance metrics",
+                        "required": True,
+                        "selectable": True
+                    },
+                    {
+                        "id": "2.9",
+                        "title": "Screen Operations",
+                        "description": "Details of operations conducted for every screen",
+                        "required": False,
+                        "selectable": True
+                    }
                 ]
             },
             {
                 "section": "3",
-                "title": "Specific Requirements",
+                "title": "External Interface Requirements",
+                "description": "Requirements ensuring the system communicates properly with external components",
                 "subsections": [
-                    {"id": "3.1", "title": "Functional Requirements", "required": True},
-                    {"id": "3.2", "title": "Interface Requirements", "required": True},
-                    {"id": "3.3", "title": "Performance Requirements", "required": True},
-                    {"id": "3.4", "title": "Design Constraints", "required": False},
-                    {"id": "3.5", "title": "Quality Attributes", "required": True},
-                    {"id": "3.6", "title": "Other Requirements", "required": False},
+                    {
+                        "id": "3.1",
+                        "title": "User Interfaces",
+                        "description": "Content presentation, navigation, and user assistance",
+                        "required": True,
+                        "selectable": True
+                    },
+                    {
+                        "id": "3.2",
+                        "title": "Hardware Interfaces",
+                        "description": "Characteristics of interfaces between software and hardware",
+                        "required": False,
+                        "selectable": True
+                    },
+                    {
+                        "id": "3.3",
+                        "title": "Software Interfaces",
+                        "description": "Connections with databases, libraries, and operating systems",
+                        "required": True,
+                        "selectable": True
+                    },
+                    {
+                        "id": "3.4",
+                        "title": "Communication Interfaces",
+                        "description": "Email, forms, APIs, and communication protocols",
+                        "required": True,
+                        "selectable": True
+                    }
+                ]
+            },
+            {
+                "section": "4",
+                "title": "Non-Functional Requirements (NFRs)",
+                "description": "Determine HOW the system will implement features (the 'Itys')",
+                "subsections": [
+                    {
+                        "id": "4.1",
+                        "title": "Security",
+                        "description": "Protection of sensitive information and data security measures",
+                        "required": True,
+                        "selectable": True
+                    },
+                    {
+                        "id": "4.2",
+                        "title": "Capacity",
+                        "description": "Current and future storage needs, scaling plans",
+                        "required": True,
+                        "selectable": True
+                    },
+                    {
+                        "id": "4.3",
+                        "title": "Compatibility",
+                        "description": "Minimum hardware requirements, OS support, browser compatibility",
+                        "required": True,
+                        "selectable": True
+                    },
+                    {
+                        "id": "4.4",
+                        "title": "Reliability and Availability",
+                        "description": "Expected usage frequency and critical failure time",
+                        "required": True,
+                        "selectable": True
+                    },
+                    {
+                        "id": "4.5",
+                        "title": "Scalability",
+                        "description": "Highest workloads under which system performs as expected",
+                        "required": True,
+                        "selectable": True
+                    },
+                    {
+                        "id": "4.6",
+                        "title": "Maintainability",
+                        "description": "Continuous integration, deployment, and maintenance procedures",
+                        "required": True,
+                        "selectable": True
+                    },
+                    {
+                        "id": "4.7",
+                        "title": "Usability",
+                        "description": "Ease of use, user experience, and accessibility",
+                        "required": True,
+                        "selectable": True
+                    },
+                    {
+                        "id": "4.8",
+                        "title": "Regulatory Requirements",
+                        "description": "Compliance with industry standards and regulations",
+                        "required": False,
+                        "selectable": True
+                    },
+                    {
+                        "id": "4.9",
+                        "title": "Environmental Requirements",
+                        "description": "Operating environment conditions and constraints",
+                        "required": False,
+                        "selectable": True
+                    }
                 ]
             },
             {
                 "section": "Appendix",
                 "title": "Appendices",
+                "description": "Supporting materials, diagrams, and additional documentation",
                 "subsections": [
-                    {"id": "A", "title": "Data Flow Diagrams", "required": False},
-                    {"id": "B", "title": "Use Case Diagrams", "required": False},
+                    {
+                        "id": "A",
+                        "title": "Data Flow Diagrams",
+                        "description": "Visual representation of data flow through the system",
+                        "required": False,
+                        "selectable": True
+                    },
+                    {
+                        "id": "B",
+                        "title": "Use Case Diagrams",
+                        "description": "User interaction scenarios and use cases",
+                        "required": False,
+                        "selectable": True
+                    },
+                    {
+                        "id": "C",
+                        "title": "System Architecture Diagrams",
+                        "description": "High-level system architecture and component interactions",
+                        "required": False,
+                        "selectable": True
+                    }
                 ]
             }
         ]

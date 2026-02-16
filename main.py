@@ -40,12 +40,19 @@ class CustomSection(BaseModel):
     description: Optional[str] = None
 
 
+class SelectedSection(BaseModel):
+    """Section selected by user"""
+    id: str = Field(..., description="Section ID (e.g., '1.1', '2.3')")
+    title: str = Field(..., description="Section title")
+
+
 class GenerateDocumentRequest(BaseModel):
     """Request model for document generation"""
     documentType: str = Field(..., description="Type of document to generate (SRS, SPRINT_REPORT, etc.)")
     projectId: str = Field(..., description="Project ID to gather context from")
     sprintId: Optional[str] = Field(None, description="Sprint ID (for sprint-specific documents)")
     userRequirements: Optional[str] = Field(None, description="User's specific requirements and focus areas")
+    selectedSections: List[SelectedSection] = Field(default_factory=list, description="Sections selected by user")
     customSections: List[CustomSection] = Field(default_factory=list, description="Custom sections to include")
     additionalNotes: Optional[str] = Field(None, description="Additional instructions for the AI")
     includeDataSummary: bool = Field(True, description="Include project data summary in document")
@@ -117,6 +124,41 @@ async def list_document_types(request: Request):
         raise HTTPException(status_code=500, detail=f"Failed to list document types: {str(e)}")
 
 
+@app.get("/api/documentation/types/{document_type}/structure")
+async def get_document_structure(document_type: str, request: Request):
+    """
+    Get the complete section structure for a specific document type
+    Returns detailed sections with descriptions for user selection
+    """
+    raw_headers = {k: v for k, v in request.headers.items()}
+    _require_api_key(raw_headers)
+    
+    print(f"\n[STRUCTURE] Request for document type: {document_type}")
+    print(f"[STRUCTURE] Uppercased: {document_type.upper()}")
+    
+    try:
+        structure = generator.get_document_structure(document_type.upper())
+        print(f"[STRUCTURE] Generator returned: {structure is not None}")
+        
+        if not structure:
+            print(f"[ERROR] Document type '{document_type.upper()}' not found in DOCUMENT_TYPES")
+            print(f"[DEBUG] Available types: {list(generator.get_document_types())}")
+            raise HTTPException(status_code=404, detail=f"Document type '{document_type}' not found")
+        
+        print(f"[SUCCESS] Returning structure with {len(structure.get('structure', []))} sections")
+        
+        return {
+            "success": True,
+            "documentType": document_type.upper(),
+            "structure": structure
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR] Exception in get_document_structure: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get structure: {str(e)}")
+
+
 @app.post("/api/documentation/generate", response_model=GenerateDocumentResponse)
 async def generate_document(req: GenerateDocumentRequest, request: Request):
     """
@@ -153,6 +195,15 @@ async def generate_document(req: GenerateDocumentRequest, request: Request):
         
         print(f"[SUCCESS] Fetched context: {len(project_context.get('tasks', []))} tasks, {len(project_context.get('sprints', []))} sprints")
         
+        # Prepare selected sections
+        selected_sections = [
+            {
+                "id": section.id,
+                "title": section.title
+            }
+            for section in req.selectedSections
+        ]
+        
         # Prepare custom sections
         custom_sections = [
             {
@@ -164,10 +215,14 @@ async def generate_document(req: GenerateDocumentRequest, request: Request):
         
         # Generate document using Gemini
         print(f"[AI] Generating {req.documentType} document...")
+        if selected_sections:
+            print(f"[AI] User selected {len(selected_sections)} specific sections")
+        
         result = await generator.generate_document(
             document_type=req.documentType,
             project_context=project_context,
             user_requirements=req.userRequirements,
+            selected_sections=selected_sections,
             custom_sections=custom_sections,
             additional_notes=req.additionalNotes,
             include_data_summary=req.includeDataSummary
