@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 
 from document_generator import DocumentGenerator
 from node_fetcher import fetch_project_context, build_headers
+from mcp_server import mcp as _mcp_server
 
 load_dotenv()
 
@@ -81,6 +82,9 @@ app = FastAPI(
 
 # Initialize document generator
 generator = DocumentGenerator()
+
+# Mount MCP server alongside existing REST routes (Streamable HTTP at /mcp)
+app.mount("/mcp", _mcp_server.get_asgi_app())
 
 
 @app.get("/health")
