@@ -8,6 +8,9 @@ endpoints remain completely intact.
 
 from typing import Any, Dict, List, Optional
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from mcp.server.fastmcp import FastMCP
 
 # Import core generator class directly (avoids circular import with main.py)

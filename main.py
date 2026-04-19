@@ -84,7 +84,15 @@ app = FastAPI(
 generator = DocumentGenerator()
 
 # Mount MCP server alongside existing REST routes (Streamable HTTP at /mcp)
-app.mount("/mcp", _mcp_server.get_asgi_app())
+try:
+    if hasattr(_mcp_server, 'get_asgi_app'):
+        app.mount("/mcp", _mcp_server.get_asgi_app())
+    elif hasattr(_mcp_server, 'asgi_app'):
+        app.mount("/mcp", _mcp_server.asgi_app())
+    else:
+        print("[WARN] MCP server could not be mounted — REST endpoints will still work")
+except Exception as e:
+    print(f"[WARN] MCP mount failed ({e}) — REST endpoints will still work")
 
 
 @app.get("/health")
@@ -290,7 +298,7 @@ async def get_document_structure(document_type: str, request: Request):
 if __name__ == "__main__":
     import uvicorn
     
-    port = int(os.getenv("PORT", "8003"))
+    port = int(os.getenv("PORT", "8004"))
     print(f"[START] Starting {APP_TITLE} on port {port}")
     print(f"[CONFIG] Gemini API configured: {bool(os.getenv('GEMINI_API_KEY'))}")
     
