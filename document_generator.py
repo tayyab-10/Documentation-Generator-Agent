@@ -175,8 +175,7 @@ class DocumentGenerator:
 ## DOCUMENT STRUCTURE TO GENERATE:
 
 """
-        
-        # If user selected specific sections, only show those
+    
         if selected_sections:
             selected_ids = {sec['id'] for sec in selected_sections}
             prompt += "\n**GENERATE ONLY THE FOLLOWING SECTIONS (user-selected):**\n\n"
